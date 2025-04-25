@@ -1,6 +1,11 @@
 #include "PropertyEditorPanel.h"
 
 #include <algorithm>
+#include <string>
+#include <windows.h>
+#include <tchar.h>
+//#include <shlwapi.h>
+#include <shellapi.h>
 
 #include "World/World.h"
 #include "Actors/Player.h"
@@ -26,6 +31,7 @@
 #include "Renderer/ShadowManager.h"
 #include "UnrealEd/EditorViewportClient.h"
 #include "UObject/UObjectIterator.h"
+#include "LuaScripts/LuaScriptComponent.h"
 
 void PropertyEditorPanel::Render()
 {
@@ -114,6 +120,26 @@ void PropertyEditorPanel::Render()
         {
             AActor* NewActor = Engine->ActiveWorld->DuplicateActor(Engine->GetSelectedActor());
             Engine->SelectActor(NewActor);
+        }
+
+        // Add Lua Script
+        if (ImGui::Button("Create Script"))
+        {
+            // Lua Script Component 생성 및 추가
+            ULuaScriptComponent* NewScript = PickedActor->AddComponent<ULuaScriptComponent>();
+            // 기본 스크립트 경로 설정
+            NewScript->ScriptPath = TEXT("LuaScripts\\template.lua");
+        }
+
+        if (ImGui::Button("Edit Script"))
+        {
+            // 예: PickedActor에서 스크립트 경로를 받아옴
+            if (auto* ScriptComp = PickedActor->GetComponentByClass<ULuaScriptComponent>())
+            {
+                std::wstring luaFilePath = ScriptComp->ScriptPath.ToWideString();
+                LPCTSTR filePath = luaFilePath.c_str();
+                OpenLuaScriptFile(filePath);
+            }
         }
     }
 
@@ -990,4 +1016,20 @@ void PropertyEditorPanel::OnResize(HWND hWnd)
     GetClientRect(hWnd, &ClientRect);
     Width = ClientRect.right - ClientRect.left;
     Height = ClientRect.bottom - ClientRect.top;
+}
+
+void PropertyEditorPanel::OpenLuaScriptFile(LPCTSTR InLuaFilePath)
+{
+    HINSTANCE hInst = ShellExecute(
+        NULL,
+        _T("open"),
+        InLuaFilePath,
+        NULL,
+        NULL,
+        SW_SHOWNORMAL
+    );
+
+    if ((INT_PTR)hInst <= 32) {
+        MessageBox(NULL, _T("파일 열기에 실패했습니다."), _T("Error"), MB_OK | MB_ICONERROR);
+    }
 }

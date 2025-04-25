@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <functional>
 #include "Core/Container/Map.h"
 
@@ -98,6 +98,7 @@ public:
 
 	bool ExecuteIfBound(ParamTypes... InArgs) const
 	{
+
 		if (IsBound())
 		{
 			Execute(std::forward<ParamTypes>(InArgs)...);

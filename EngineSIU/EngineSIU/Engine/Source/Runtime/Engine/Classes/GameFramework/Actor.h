@@ -128,7 +128,7 @@ public:
     void SetActorTickInEditor(bool InbInTickInEditor);
 
 private:
-    bool bTickInEditor = false;
+    bool bTickInEditor = false;     // Editor Tick을 수행 여부
 
 };
 

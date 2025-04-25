@@ -343,11 +343,13 @@ void FShadowRenderPass::CreateShader()
         UE_LOG(LogLevel::Error, TEXT("Failed to create DepthCubeMapGS shader!"));
     }
 
+    /*
     hr = ShaderManager->AddPixelShader(L"DepthOnlyPS", L"Shaders/PointLightCubemapGS.hlsl", "mainPS");
     if (FAILED(hr))
     {
         UE_LOG(LogLevel::Error, TEXT("Failed to create DepthOnlyPS shader!"));
     }
+    */
 
     hr = ShaderManager->AddVertexShader(L"CascadedShadowMapVS", L"Shaders/CascadedShadowMap.hlsl", "mainVS");
     if (FAILED(hr))

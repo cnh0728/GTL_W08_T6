@@ -110,6 +110,7 @@ void UEditorEngine::StartPIE()
         UE_LOG(LogLevel::Warning, TEXT("PIEWorld already exists!"));
         return;
     }
+    this->ClearActorSelection(); // Editor World 기준 Select Actor 해제 
 
     FWorldContext& PIEWorldContext = CreateNewWorldContext(EWorldType::PIE);
 
@@ -128,6 +129,7 @@ void UEditorEngine::EndPIE()
 {
     if (PIEWorld)
     {
+        this->ClearActorSelection(); // PIE World 기준 Select Actor 해제 
         //WorldList.Remove(*GetWorldContextFromWorld(PIEWorld.get()));
         WorldList.Remove(GetWorldContextFromWorld(PIEWorld));
         PIEWorld->Release();

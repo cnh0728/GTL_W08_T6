@@ -232,6 +232,7 @@
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\Light\LightComponent.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\Light\PointLightComponent.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\Light\SpotLightComponent.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\LuaComponent.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\Material\Material.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\MeshComponent.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\Mesh\StaticMesh.cpp" />
@@ -466,6 +467,7 @@
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\Light\LightComponent.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\Light\PointLightComponent.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\Light\SpotLightComponent.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\LuaComponent.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\Material\Material.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\MeshComponent.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\Mesh\StaticMesh.h" />
@@ -590,6 +592,7 @@
     <Content Include="Engine\Source\ThirdParty\DirectXTK\Lib\x86\Debug\DirectXTK.lib" />
     <Content Include="Engine\Source\ThirdParty\DirectXTK\Lib\x86\Release\DirectXTK.lib" />
     <Content Include="Engine\Source\ThirdParty\tinyfiledialogs\README.txt" />
+    <Content Include="LuaScripts\LuaScript.lua" />
     <Natvis Include="EngineSIU.natvis" />
   </ItemGroup>
   <ItemGroup>

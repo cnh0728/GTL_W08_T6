@@ -56,7 +56,6 @@ void FDepthPrePass::PrepareRenderState(const std::shared_ptr<FEditorViewportClie
     ID3D11RenderTargetView* nullRTV = nullptr;
     Graphics->DeviceContext->OMSetRenderTargets(1, &nullRTV, DepthStencilView); // ← 깊이 전용
     */
-    
     VertexShader = ShaderManager->GetVertexShaderByKey(L"StaticMeshVertexShader");
     InputLayout = ShaderManager->GetInputLayoutByKey(L"StaticMeshVertexShader");
     
@@ -68,7 +67,8 @@ void FDepthPrePass::PrepareRenderState(const std::shared_ptr<FEditorViewportClie
 
     Graphics->DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-    Graphics->DeviceContext->RSSetState(Graphics->RasterizerSolidBack);
+    Graphics->DeviceContext->RSSetState(Graphics->RasterizerShadow);
+    //Graphics->DeviceContext->RSSetState(Graphics->RasterizerSolidBack);
 
     Graphics->DeviceContext->OMSetBlendState(nullptr, nullptr, 0xFFFFFFFF);
 

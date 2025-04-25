@@ -39,8 +39,8 @@ void FTileLightCullingPass::Initialize(FDXDBufferManager* InBufferManager, FGrap
     Graphics = InGraphics;
     ShaderManager = InShaderManage;
 
-    ResizeTiles(Graphics->ScreenWidth, Graphics->ScreenHeight); // 시작은 전체 크기
     // 한 타일이 가질 수 있는 조명 ID 목록을 비트마스크로 표현한 총 슬롯 수
+    ResizeTiles(Graphics->ScreenWidth, Graphics->ScreenHeight); // 시작은 전체 크기
 
     CreateShader();
     CreateViews();
@@ -86,7 +86,7 @@ void FTileLightCullingPass::Render(const std::shared_ptr<FEditorViewportClient>&
 
 void FTileLightCullingPass::Dispatch(const std::shared_ptr<FEditorViewportClient>& Viewport) const
 {
-    // 한 스레드 그룹(groupSizeX, groupSizeY)은 16x16픽셀 영역처리
+    // 한 스레드 그룹(groupSizeX, groupSizeY)은 32x32픽셀 영역처리
     const UINT GroupSizeX = (Viewport->GetD3DViewport().Width  + TILE_SIZE - 1) / TILE_SIZE;
     const UINT GroupSizeY = (Viewport->GetD3DViewport().Height + TILE_SIZE - 1) / TILE_SIZE;
 
@@ -395,7 +395,7 @@ void FTileLightCullingPass::CreateBuffers(uint32 InWidth, uint32 InHeight)
         UE_LOG(LogLevel::Error, TEXT("Failed to create Heatmap SRV!"));
     }
 
-    //// 4. TileLight Culling 설정용 ConstantBuffer (2.5D 켜기/끄기 등)
+    // 4. TileLight Culling 설정용 ConstantBuffer (2.5D 켜기/끄기 등)
     D3D11_BUFFER_DESC CBDesc = {};
     CBDesc.Usage = D3D11_USAGE_DYNAMIC;
     CBDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;

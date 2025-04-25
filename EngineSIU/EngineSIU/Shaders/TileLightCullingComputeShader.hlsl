@@ -47,8 +47,8 @@ void CullLight(uint index, float3 lightVSPos, float radius, Frustum frustum, flo
         return;
     if (Enable25DCulling != 0 && !ShouldLightAffectTile(lightVSPos, radius, minZ, maxZ, tileDepthMask))
         return;
-    uint bucketIdx = index / 32;
-    uint bitIdx = index % 32;
+    uint bucketIdx = index / 32;    // 각 타일별의 몇 번째 정수 - bucket
+    uint bitIdx = index % 32;       // 해당 정수의 몇 번째 비트 - bitIdx
     InterlockedOr(MaskBuffer[flatTileIndex * SHADER_ENTITY_TILE_BUCKET_COUNT + bucketIdx], 1 << bitIdx);
     InterlockedAdd(hitCount, 1);
     InterlockedOr(CulledMaskBuffer[bucketIdx], 1 << (index % 32));

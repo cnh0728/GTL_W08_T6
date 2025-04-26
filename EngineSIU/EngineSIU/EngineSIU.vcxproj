@@ -596,6 +596,7 @@
     <Content Include="Engine\Source\ThirdParty\DirectXTK\Lib\x86\Release\DirectXTK.lib" />
     <Content Include="Engine\Source\ThirdParty\tinyfiledialogs\README.txt" />
     <Content Include="LuaScripts\LuaScript.lua" />
+    <Content Include="LuaScripts\template.lua" />
     <Natvis Include="EngineSIU.natvis" />
   </ItemGroup>
   <ItemGroup>

@@ -23,6 +23,7 @@
 #include "UObject/ObjectFactory.h"
 #include "Engine/Engine.h"
 #include "Components/HeightFogComponent.h"
+#include "Components/LuaComponent.h"
 #include "Components/ProjectileMovementComponent.h"
 #include "GameFramework/Actor.h"
 #include "Engine/AssetManager.h"
@@ -126,15 +127,15 @@ void PropertyEditorPanel::Render()
         if (ImGui::Button("Create Script"))
         {
             // Lua Script Component 생성 및 추가
-            ULuaScriptComponent* NewScript = PickedActor->AddComponent<ULuaScriptComponent>();
+            ULuaComponent* NewScript = PickedActor->AddComponent<ULuaComponent>();
             // 기본 스크립트 경로 설정
-            NewScript->ScriptPath = TEXT("LuaScripts\\template.lua");
+            NewScript->ScriptPath = TEXT("LuaScripts\\LuaScript.lua");
         }
 
         if (ImGui::Button("Edit Script"))
         {
             // 예: PickedActor에서 스크립트 경로를 받아옴
-            if (auto* ScriptComp = PickedActor->GetComponentByClass<ULuaScriptComponent>())
+            if (auto* ScriptComp = PickedActor->GetComponentByClass<ULuaComponent>())
             {
                 std::wstring luaFilePath = ScriptComp->ScriptPath.ToWideString();
                 LPCTSTR filePath = luaFilePath.c_str();

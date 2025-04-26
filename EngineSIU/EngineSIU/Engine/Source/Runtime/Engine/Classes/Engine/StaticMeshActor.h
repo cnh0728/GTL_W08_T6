@@ -15,5 +15,5 @@ public:
 
 protected:
     UPROPERTY
-    (UStaticMeshComponent*, StaticMeshComponent, = nullptr);
+    (UStaticMeshComponent*, StaticMeshComponent, = nullptr)
 };

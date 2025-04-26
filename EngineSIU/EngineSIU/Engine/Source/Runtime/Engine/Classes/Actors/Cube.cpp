@@ -9,6 +9,7 @@ ACube::ACube()
 {
     // Begin Test
     //StaticMeshComponent->SetStaticMesh(FManagerOBJ::GetStaticMesh(L"Contents/helloBlender.obj"));
+    RootComponent = StaticMeshComponent;
     StaticMeshComponent->SetStaticMesh(FManagerOBJ::GetStaticMesh(L"Contents/Reference/Reference.obj"));
     // End Test
 }

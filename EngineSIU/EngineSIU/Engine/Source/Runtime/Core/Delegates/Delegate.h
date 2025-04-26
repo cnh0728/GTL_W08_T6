@@ -8,7 +8,6 @@
 #define FUNC_DECLARE_MULTICAST_DELEGATE(MulticastDelegateName, ReturnType, ...) \
 	using MulticastDelegateName = TMulticastDelegate<ReturnType(__VA_ARGS__)>;
 
-
 class FDelegateHandle
 {
 	friend class std::hash<FDelegateHandle>;

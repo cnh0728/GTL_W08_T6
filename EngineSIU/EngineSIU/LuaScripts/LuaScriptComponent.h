@@ -1,8 +1,16 @@
 #pragma once
 #include "Runtime/CoreUObject/UObject/ObjectMacros.h"
 #include "Components/ActorComponent.h"
+#include "CoroutineTask.h"
 #include <sol/sol.hpp>
 #include <filesystem>
+
+struct LuaCoroutine
+{
+    sol::thread Thread;
+    sol::coroutine Coroutine;
+    std::shared_ptr<FCoroutineTask> Task;
+};
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnLocationTenUp, const FVector);
 
@@ -59,6 +67,15 @@ private:
     std::filesystem::file_time_type LastWriteTime;
     bool CheckFileModified();
     void ReloadScript();
+
+    // List of active coroutines and tasks
+    std::vector<LuaCoroutine> ActiveCoroutines;
+
+    // Regist a coroutine with a task
+    void RegistCoroutine(std::shared_ptr<FCoroutineTask> Task);
+
+    // Process coroutines during tick
+    void UpdateCoroutines(float DeltaTime);
 };
 
 template <typename ... Arguments>

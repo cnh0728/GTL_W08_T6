@@ -75,7 +75,7 @@ void ULuaScriptComponent::InitializeLuaState()
         }
     }
 
-    LuaState.open_libraries();
+    LuaState.open_libraries(sol::lib::base, sol::lib::coroutine, sol::lib::table, sol::lib::string);
     BindEngineAPI();
 
     try {
@@ -94,8 +94,8 @@ void ULuaScriptComponent::BindEngineAPI()
     // [1] 바인딩 전 글로벌 키 스냅샷
     TArray<FString> Before = LuaDebugHelper::CaptureGlobalNames(LuaState);
 
-    LuaBindingHelpers::BindPrint(LuaState);    // 0) Print 바인딩
-    LuaBindingHelpers::BindFVector(LuaState);   // 2) FVector 바인딩
+    LuaBindingHelpers::BindPrint(LuaState);
+    LuaBindingHelpers::BindFVector(LuaState);
 
     auto ActorType = LuaState.new_usertype<AActor>("Actor",
         sol::constructors<>(),
@@ -104,7 +104,25 @@ void ULuaScriptComponent::BindEngineAPI()
             &AActor::SetActorLocation
         )
     );
-    
+
+    //LuaState["coroutine"] = LuaState.create_table_with(
+    //    "create", [this](sol::function f) {
+    //        sol::thread runner = sol::thread::create(LuaState.lua_state());
+    //        sol::state_view runnerstate = runner.state();
+    //        sol::coroutine Coroutine = runnerstate["coroutine"];
+    //        return sol::thread::create(f.lua_state());
+    //    }
+    //    /*"resume", [this](sol::thread thread) {
+    //        sol::coroutine co = thread;
+    //        LuaState["__current_coroutine"] = co;
+    //        return co();
+    //    }*/
+    //);
+
+    LuaState.set_function("Wait", sol::yielding([this](float Seconds) {
+        this->RegistCoroutine(std::make_shared<WaitTask>(Seconds));
+    }));
+
     // 프로퍼티 바인딩
     LuaState["actor"] = GetOwner();
 
@@ -154,6 +172,8 @@ void ULuaScriptComponent::TickComponent(float DeltaTime)
 {
     Super::TickComponent(DeltaTime);
 
+    UpdateCoroutines(DeltaTime);
+
     CallLuaFunction("Tick", DeltaTime);
 
     if (CheckFileModified()) {
@@ -167,3 +187,46 @@ void ULuaScriptComponent::TickComponent(float DeltaTime)
     }
 }
 
+void ULuaScriptComponent::RegistCoroutine(std::shared_ptr<FCoroutineTask> Task)
+{
+    sol::thread Thread = sol::thread::create(LuaState.lua_state());
+    sol::state_view ThreadState = Thread.state();
+    sol::coroutine Coroutine = ThreadState["wait"];
+    if (!Coroutine.valid()) {
+        UE_LOG(LogLevel::Error, TEXT("Attempt to yield from non-coroutine context"));
+        return;
+    }
+
+    LuaCoroutine TaskInfo;
+    TaskInfo.Thread = Thread;
+    TaskInfo.Coroutine = Coroutine;
+    TaskInfo.Task = Task;
+
+    ActiveCoroutines.push_back(TaskInfo);
+}
+
+void ULuaScriptComponent::UpdateCoroutines(float DeltaTime)
+{
+    for (auto it = ActiveCoroutines.begin(); it != ActiveCoroutines.end();) {
+        if (it->Task->IsComplete(DeltaTime)) {
+            try {
+                // Resume the coroutine
+                it->Coroutine();
+
+                if (it->Coroutine.status() != sol::call_status::yielded) {
+                    it = ActiveCoroutines.erase(it);
+                }
+                else {
+                    ++it;
+                }
+            }
+            catch (const sol::error& e) {
+                UE_LOG(LogLevel::Error, TEXT("Error resuming coroutine: %s"), e.what());
+                it = ActiveCoroutines.erase(it);
+            }
+        }
+        else {
+            ++it;
+        }
+    }
+}

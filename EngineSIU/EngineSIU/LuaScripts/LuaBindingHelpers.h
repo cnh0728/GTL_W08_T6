@@ -8,9 +8,9 @@
 namespace LuaBindingHelpers
 {
     // FVector 타입 바인딩 함수
-    inline void BindFVector(sol::state& Lua)
+    inline void BindFVector(sol::environment& Env)
     {
-        Lua.new_usertype<FVector>("FVector",
+        Env.new_usertype<FVector>("FVector",
             sol::constructors<
             FVector(),               // 기본 생성자
             FVector(float, float, float)  // XYZ 지정 생성자
@@ -42,9 +42,9 @@ namespace LuaBindingHelpers
     }
 
     // UE_LOG 바인딩 함수
-    inline void BindUE_LOG(sol::state& Lua)
+    inline void BindUE_LOG(sol::environment& Env)
     {
-        Lua.set_function("UE_LOG",
+        Env.set_function("UE_LOG",
             [](const std::string& Level, const std::string& Msg)
             {
                 FString Converted = FString(Msg.c_str());
@@ -65,9 +65,9 @@ namespace LuaBindingHelpers
     }
 
     // Lua print 함수 바인딩 (콘솔 + 화면)
-    inline void BindPrint(sol::state& Lua)
+    inline void BindPrint(sol::environment& Env)
     {
-        Lua.set_function("print",
+        Env.set_function("print",
             [](const std::string& Msg)
             {
                 // 로그에 출력

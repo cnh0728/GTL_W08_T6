@@ -25,6 +25,7 @@ public:
     FEngineLoop();
 
     int32 PreInit();
+    void AttachDebugConsole();
     int32 Init(HINSTANCE hInstance);
     void Render() const;
     void Tick();

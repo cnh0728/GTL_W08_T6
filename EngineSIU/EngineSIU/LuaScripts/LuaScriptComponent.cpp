@@ -113,6 +113,13 @@ void ULuaScriptComponent::InitializeLuaState()
     catch (const sol::error& err) {
         UE_LOG(LogLevel::Error, TEXT("Lua Initialization error: %s"), err.what());
     }
+
+    if (auto gm = Cast<AGameMode>(GetOwner()))
+    {
+        UE_LOG(LogLevel::Error, TEXT("Tick 함수 존재? %s"),
+            LuaEnv["Tick"] ? TEXT("예") : TEXT("아니오"));
+    }
+    
 }
 
 void ULuaScriptComponent::BindEngineAPI()
@@ -120,8 +127,8 @@ void ULuaScriptComponent::BindEngineAPI()
     // [1] 바인딩 전 글로벌 키 스냅샷
     TArray<FString> Before = LuaDebugHelper::CaptureGlobalNames(LuaState);
 
-    LuaBindingHelpers::BindPrint(LuaState);    // 0) Print 바인딩
-    LuaBindingHelpers::BindFVector(LuaState);   // 2) FVector 바인딩
+    LuaBindingHelpers::BindPrint(LuaEnv);    // 0) Print 바인딩
+    LuaBindingHelpers::BindFVector(LuaEnv);   // 2) FVector 바인딩
 
     if (AGameMode* GameMode = Cast<AGameMode>(GetOwner()))
     {

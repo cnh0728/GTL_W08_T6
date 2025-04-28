@@ -14,7 +14,10 @@
 #include "Engine/EditorEngine.h"
 #include "Renderer/DepthPrePass.h"
 #include "Renderer/TileLightCullingPass.h"
-
+#include <windows.h>
+#include <iostream>
+#include <fcntl.h>
+#include <io.h>
 
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -37,6 +40,24 @@ FEngineLoop::FEngineLoop()
 int32 FEngineLoop::PreInit()
 {
     return 0;
+}
+
+void FEngineLoop::AttachDebugConsole()
+{
+    if (AllocConsole())
+    {
+        // stdout / stdin / stderr 를 콘솔에 연결
+        FILE* fp;
+        freopen_s(&fp, "CONOUT$", "w", stdout);
+        freopen_s(&fp, "CONIN$", "r", stdin);
+        freopen_s(&fp, "CONOUT$", "w", stderr);
+
+        // C++ 스트림도 연결
+        std::ios::sync_with_stdio();
+        std::cout.clear();
+        std::clog.clear();
+        std::cerr.clear();
+    }
 }
 
 int32 FEngineLoop::Init(HINSTANCE hInstance)
@@ -93,6 +114,8 @@ int32 FEngineLoop::Init(HINSTANCE hInstance)
     GEngine->Init();
 
     UpdateUI();
+
+    AttachDebugConsole();
 
     return 0;
 }

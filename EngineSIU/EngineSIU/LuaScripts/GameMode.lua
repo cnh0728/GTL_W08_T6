@@ -17,7 +17,9 @@ function BeginPlay(self)
     end)
 end
 
-function Tick(self, dt)
+function Tick(dt)
+    UE_LOG("Error", "Tick Game Manager")
+
     if GameMode:IsRunning() and not GameMode:IsEnded() then
         local et = GameMode:GetElapsedTime() + dt * 0.5
         GameMode:SetElapsedTime(et)

@@ -3,6 +3,7 @@
 #include "Runtime/Core/Math/Vector.h"
 #include "Runtime/Engine/UserInterface/Console.h"
 #include "EngineLoop.h"
+#include "GameFramework/GameMode.h"
 
 namespace LuaBindingHelpers
 {
@@ -75,6 +76,33 @@ namespace LuaBindingHelpers
                 OutputDebugStringA(Msg.c_str()); // 디버그 창에 출력
             }
         );
+    }
+
+    inline void BindGameMode(sol::environment& Env)
+    {
+        Env.new_usertype<AGameMode>("GameMode",
+            "InitGame", &AGameMode::InitGame,
+            "StartMatch", &AGameMode::StartMatch,
+            "EndMatch", &AGameMode::EndMatch,
+            "GetElapsedTime", [](AGameMode* gm) { return gm->GameInfo.ElapsedGameTime; },
+            "IsRunning", [](AGameMode* gm) { return gm->bGameRunning; },
+            "IsEnded", [](AGameMode* gm) { return gm->bGameEnded; }
+        );
+
+        
+        // Input binding helper
+        Env.set_function("BindKeyDown", [&](int key, sol::function fn) {
+            if (auto handler = GEngineLoop.GetAppMessageHandler())
+            {
+                handler->OnKeyDownDelegate.AddLambda([key, fn](const FKeyEvent& ev)
+                    {
+                        if (ev.GetKeyCode() == key) fn();
+                    });
+            }
+            });
+        // Key codes
+        Env["KEY_SPACE"] = int(VK_SPACE);
+        Env["KEY_CTRL"] = int(VK_CONTROL);
     }
 }
 

@@ -42,7 +42,6 @@ public:
     FOnGameStart OnGameStart;
     FOnGameEnd OnGameEnd;
 
-private:
     bool     bGameRunning = false; // 내부 
     bool     bGameEnded = true;
     FGameInfo GameInfo;

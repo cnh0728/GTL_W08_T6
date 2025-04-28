@@ -81,8 +81,13 @@ void ULuaScriptComponent::SetScriptPath(const FString& InScriptPath)
 void ULuaScriptComponent::InitializeLuaState()
 {
     if (ScriptPath.IsEmpty()) {
+        auto TemplatePath = L"template.lua";
+        if (auto gm = Cast<AGameMode>(GetOwner()))
+        {
+            TemplatePath = L"GameMode.lua";
+        }
         bool bSuccess = LuaScriptFileUtils::CopyTemplateToActorScript(
-            L"template.lua",
+            TemplatePath,
             GetOwner()->GetWorld()->GetName().ToWideString(),
             GetOwner()->GetName().ToWideString(),
             ScriptPath,
@@ -95,10 +100,12 @@ void ULuaScriptComponent::InitializeLuaState()
     }
 
     LuaState.open_libraries();
+    LuaEnv = sol::environment(LuaState, sol::create, LuaState.globals());
+
     BindEngineAPI();
 
     try {
-        LuaState.script_file((*ScriptPath));
+        LuaState.script_file((*ScriptPath), LuaEnv);
         bScriptValid = true;
         const std::wstring FilePath = ScriptPath.ToWideString();
         LastWriteTime = std::filesystem::last_write_time(FilePath);
@@ -115,6 +122,26 @@ void ULuaScriptComponent::BindEngineAPI()
 
     LuaBindingHelpers::BindPrint(LuaState);    // 0) Print 바인딩
     LuaBindingHelpers::BindFVector(LuaState);   // 2) FVector 바인딩
+
+    if (AGameMode* GameMode = Cast<AGameMode>(GetOwner()))
+    {
+        LuaEnv["GameMode"] = GameMode;
+        LuaBindingHelpers::BindGameMode(LuaEnv); // 1) GameMode 바인딩
+        // Bind delegates
+        LuaEnv.set_function("OnGameInit", [this](sol::function fn) {
+            if (auto gm = Cast<AGameMode>(GetWorld()->GetGameMode()))
+                gm->OnGameInit.AddLambda([fn]() { fn(); });
+            });
+        LuaEnv.set_function("OnGameStart", [this](sol::function fn) {
+            if (auto gm = Cast<AGameMode>(GetWorld()->GetGameMode()))
+                gm->OnGameStart.AddLambda([fn]() { fn(); });
+            });
+        LuaEnv.set_function("OnGameEnd", [this](sol::function fn) {
+            if (auto gm = Cast<AGameMode>(GetWorld()->GetGameMode()))
+                gm->OnGameEnd.AddLambda([fn]() { fn(); });
+            });
+
+    }
 
     auto ActorType = LuaState.new_usertype<AActor>("Actor",
         sol::constructors<>(),

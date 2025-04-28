@@ -46,6 +46,8 @@ private:
 
     // Lua-Engine 바인딩
     void BindEngineAPI();
+    bool CheckFileModified();
+    void ReloadScript();
 
     FString ScriptPath;
     FString DisplayName;
@@ -53,11 +55,11 @@ private:
     TArray<FDelegateHandle> DelegateHandles;
     
     sol::state LuaState;
-    bool bScriptValid = false;
+    sol::environment LuaEnv;
 
     std::filesystem::file_time_type LastWriteTime;
-    bool CheckFileModified();
-    void ReloadScript();
+
+    bool bScriptValid = false;
 };
 
 template <typename ... Arguments>

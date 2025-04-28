@@ -74,6 +74,7 @@ public:
     
     void CheckOverlap(const UPrimitiveComponent* Component, TArray<FOverlapResult>& OutOverlaps) const;
 
+    AGameMode* GetGameMode() const { return GameMode; }
 private:
     AGameMode* GameMode = nullptr;
 

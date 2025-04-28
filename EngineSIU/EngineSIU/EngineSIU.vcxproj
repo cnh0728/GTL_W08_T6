@@ -311,7 +311,9 @@
     <ClCompile Include="Engine\Source\ThirdParty\include\ImGUI\imgui_tables.cpp" />
     <ClCompile Include="Engine\Source\ThirdParty\include\ImGUI\imgui_widgets.cpp" />
     <ClCompile Include="Engine\Source\ThirdParty\tinyfiledialogs\tinyfiledialogs.cpp" />
-    <ClCompile Include="LuaScripts\LuaScriptComponent.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\LuaScriptComponent.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Engine\Lua\LuaScriptManager.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Engine\Lua\LuaTypes\LuaUserTypes.cpp" />
     <None Include="Shaders\CompositingShader.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
@@ -516,6 +518,8 @@
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Engine\Texture.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\GameFramework\Actor.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Level.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\Lua\LuaUtils\LuaBindUtils.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\Lua\LuaUtils\LuaTypeMacros.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\UnrealClient.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\UserInterface\Console.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\ViewportClient.h" />
@@ -599,9 +603,9 @@
     <ClInclude Include="Engine\Source\ThirdParty\include\ImGUI\imstb_truetype.h" />
     <ClInclude Include="Engine\Source\ThirdParty\JSON\json.hpp" />
     <ClInclude Include="Engine\Source\ThirdParty\tinyfiledialogs\tinyfiledialogs.h" />
-    <ClInclude Include="LuaScripts\LuaBindingHelpers.h" />
-    <ClInclude Include="LuaScripts\LuaScriptComponent.h" />
-    <ClInclude Include="LuaScripts\LuaScriptFileUtils.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\Lua\LuaScriptManager.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\LuaScriptComponent.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\Lua\LuaTypes\LuaUserTypes.h" />
     <None Include="Shaders\EditorShaderConstants.hlsli">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>

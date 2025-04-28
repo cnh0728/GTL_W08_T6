@@ -7,6 +7,13 @@
 #include "UObject/ObjectFactory.h"
 #include "UObject/ObjectMacros.h"
 
+class ULuaScriptComponent;
+
+namespace sol
+{
+    class state;
+}
+
 DECLARE_MULTICAST_DELEGATE_TwoParams(FActorBeginOverlapSignature, AActor* /* OverlappedActor */, AActor* /* OtherActor */);
 DECLARE_MULTICAST_DELEGATE_TwoParams(FActorEndOverlapSignature, AActor* /* OverlappedActor */, AActor* /* OtherActor */);
 DECLARE_MULTICAST_DELEGATE_FourParams(FActorHitSignature, AActor* /* SelfActor */, AActor* /* OtherActor */, FVector /*NormalImpulse*/, const FHitResult& /* Hit */);
@@ -20,6 +27,7 @@ class AActor : public UObject
 public:
     AActor() = default;
 
+    virtual void PostSpawnInitialize();
     virtual UObject* Duplicate(UObject* InOuter) override;
 
     /** Actor가 게임에 배치되거나 스폰될 때 호출됩니다. */
@@ -71,6 +79,10 @@ public:
     template<typename T>
         requires std::derived_from<T, UActorComponent>
     T* GetComponentByClass() const;
+
+    template<typename T>
+        requires std::derived_from<T, UActorComponent>
+    T* GetComponentByFName(FName InName);
 
     void InitializeComponents();
     void UninitializeComponents();
@@ -135,6 +147,17 @@ public:
 private:
     bool bTickInEditor = false;     // Editor Tick을 수행 여부
 
+public: // Lua Script.
+    // 자기 자신이 가진 정보들 Lua에 등록.
+    void InitLuaScriptComponent();
+    FString GetLuaScriptPathName();
+    virtual void RegisterLuaType(sol::state& Lua); // Lua에 클래스 등록해주는 함수.
+    virtual bool BindSelfLuaProperties(); // LuaEnv에서 사용할 멤버 변수 등록 함수.
+
+    bool bUseScript = true;
+private:
+    ULuaScriptComponent* LuaScriptComponent = nullptr;
+
 public:
     /** 
      * Called when another actor begins to overlap this actor, for example a player walking into a trigger.
@@ -172,6 +195,23 @@ T* AActor::GetComponentByClass() const
         if (T* CastedComponent = Cast<T>(Component))
         {
             return CastedComponent;
+        }
+    }
+    return nullptr;
+}
+
+template<typename T>
+    requires std::derived_from<T, UActorComponent>
+T* AActor::GetComponentByFName(FName InName)
+{
+    for (UActorComponent* Component : OwnedComponents)
+    {
+        if (Component->GetFName() == InName)
+        {
+            if (T* CastedComponent = Cast<T>(Component))
+            {
+                return CastedComponent;
+            }
         }
     }
     return nullptr;

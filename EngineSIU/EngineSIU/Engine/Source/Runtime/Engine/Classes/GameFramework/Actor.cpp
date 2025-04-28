@@ -2,7 +2,15 @@
 
 #include "Components/PrimitiveComponent.h"
 #include "World/World.h"
+#include "Components/LuaScriptComponent.h"
+#include "Engine/Lua/LuaScriptManager.h"
 
+#include "Engine/Lua/LuaUtils/LuaTypeMacros.h"
+
+void AActor::PostSpawnInitialize()
+{
+    InitLuaScriptComponent();
+}
 
 UObject* AActor::Duplicate(UObject* InOuter)
 {
@@ -84,13 +92,19 @@ UObject* AActor::Duplicate(UObject* InOuter)
         }
     }
 
-    
+    NewActor->LuaScriptComponent = NewActor->GetComponentByClass<ULuaScriptComponent>();
 
     return NewActor;
 }
 
 void AActor::BeginPlay()
 {
+    if (bUseScript)
+    {
+        RegisterLuaType(FLuaScriptManager::Get().GetLua());
+        BindSelfLuaProperties();
+    }
+
     // TODO: 나중에 삭제를 Pending으로 하던가 해서 복사비용 줄이기
     const auto CopyComponents = OwnedComponents;
     for (UActorComponent* Comp : CopyComponents)
@@ -323,4 +337,60 @@ bool AActor::SetActorScale(const FVector& NewScale)
 void AActor::SetActorTickInEditor(bool InbInTickInEditor)
 {
     bTickInEditor = InbInTickInEditor;
+}
+
+void AActor::InitLuaScriptComponent()
+{
+    if (LuaScriptComponent == nullptr)
+    {
+        LuaScriptComponent = GetComponentByFName<ULuaScriptComponent>("LuaComponent_0");
+        if (LuaScriptComponent == nullptr)
+        {
+            LuaScriptComponent = AddComponent<ULuaScriptComponent>("LuaComponent_0");
+        }
+    }
+}
+
+FString AActor::GetLuaScriptPathName()
+{
+    return LuaScriptComponent ? LuaScriptComponent->GetScriptName() : TEXT("");
+}
+
+void AActor::RegisterLuaType(sol::state& Lua)
+{
+    DEFINE_LUA_TYPE_NO_PARENT(AActor,
+        "UUID", sol::property(&ThisClass::GetUUID),
+        /*"ActorName", &ThisClass::GetName,*/ // FString은 넘어가지 않는 중 내부에서 사용 불가.
+        "ActorLocation", sol::property(&ThisClass::GetActorLocation, &ThisClass::SetActorLocation),
+        "ActorRotation", sol::property(&ThisClass::GetActorRotation, &ThisClass::SetActorRotation),
+        "ActorScale", sol::property(&ThisClass::GetActorScale, &ThisClass::SetActorScale)
+    )
+}
+
+bool AActor::BindSelfLuaProperties()
+{
+    if (!LuaScriptComponent)
+    {
+        return false;
+    }
+    // LuaScript Load 실패.
+    if (!LuaScriptComponent->LoadScript())
+    {
+        return false;
+    }
+
+    sol::table& LuaTable = LuaScriptComponent->GetLuaSelfTable();
+    if (!LuaTable.valid())
+    {
+        return false;
+    }
+
+    // 자기 자신 등록.
+    // self에 this를 하게 되면 내부에서 임의로 Table로 바꿔버리기 때문에 self:함수() 형태의 호출이 불가능.
+    // 자기 자신 객체를 따로 넘겨주어야만 AActor:GetName() 같은 함수를 실행시켜줄 수 있다.
+    LuaTable["this"] = this;
+    LuaTable["Name"] = *GetName(); // FString 해결되기 전까지 임시로 Table로 전달.
+    // 이 아래에서 또는 하위 클래스 함수에서 멤버 변수 등록.
+
+    return true;
 }

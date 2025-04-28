@@ -67,7 +67,7 @@ cbuffer ConstantBufferDebugArrow : register(b11)
 struct CapsuleData
 {
     row_major matrix WorldMatrix;
-    float Height;
+    float HalfHeight;
     float Radius;
 };
 

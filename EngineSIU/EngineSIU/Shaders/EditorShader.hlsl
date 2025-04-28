@@ -627,30 +627,149 @@ float4 ArrowPS(PS_INPUT input) : SV_Target
     return input.color;
 }
 
-/////////////////////////////////////////////
-// Capsule
-
-PS_INPUT CapsuleVS(VS_INPUT_POS_ONLY Input, uint InstanceID : SV_InstanceID)
+PS_INPUT CapsuleVS(
+    uint vertexID : SV_VertexID,
+    uint instanceID : SV_InstanceID
+)
 {
     PS_INPUT output;
-    
-    float Height = DataCapsule[InstanceID].Height;
-    float Radius = DataCapsule[InstanceID].Radius;
-    
+    //— 1) 인스턴스별 파라미터
+    float halfHeight = DataCapsule[instanceID].HalfHeight;
+    float Radius = DataCapsule[instanceID].Radius;
+    float4x4 World = DataCapsule[instanceID].WorldMatrix;
 
-    float3 ScaledPos = float3(
-        Input.position.x * Radius,
-        Input.position.y * Radius,
-        Input.position.z * Height
-    );
-    
-    float4 WorldPosition = mul(float4(ScaledPos, 1.f), DataCapsule[InstanceID].WorldMatrix);
-         
-    WorldPosition = mul(WorldPosition, ViewMatrix);
-    WorldPosition = mul(WorldPosition, ProjectionMatrix);
-    output.position = WorldPosition;
-    output.color = float4(1, 1, 1, 1);
-        
+    //— 2) 분할 개수
+    static const uint segments = 16;
+    static const uint stacks = 8;
+    static const float PI = 3.1415926535897932f;
+
+    //— 3) offset 계산
+    float centerOffset = halfHeight - Radius;
+
+    //— 4) 파트별 라인/버텍스 개수
+    uint horizTop = (stacks + 1) * segments;    // 수평 링: stacks+1 개
+    uint vertTop = stacks * segments;           // 수직 줄: stacks 개
+    uint linesTop = horizTop + vertTop;         // = segments*(2*stacks+1)
+    uint vertsTop = linesTop * 2;               // 544 (stacks=8, segments=16)
+
+    uint linesCyl = segments * 3;               // 48
+    uint vertsCyl = linesCyl * 2;               // 96
+
+    uint vertsInst = vertsTop + vertsCyl + vertsTop; // 544+96+544 = 1184
+
+    //— 5) 절차적 매핑
+    float3 localPos;
+    uint v = vertexID % vertsInst;
+    if (v < vertsTop)
+    {
+        // --- 상단 반구 ---
+        uint lineIdx = v / 2; // [0 .. linesTop-1]
+        bool isEnd = (v & 1) == 1;
+
+        float3 p0, p1;
+        if (lineIdx < horizTop)
+        {
+            // 1) 수평 링
+            uint stackId = lineIdx / segments; // 0..stacks
+            uint segId = lineIdx % segments;
+
+            float t = stackId / float(stacks);
+            float theta = t * (PI / 2);
+            float z0 = cos(theta), r0 = sin(theta);
+            float phi = (segId / float(segments)) * 2 * PI;
+            p0 = float3(r0 * cos(phi), r0 * sin(phi), z0);
+            // 다음 세그먼트
+            float phi1 = (((segId + 1) % segments) / float(segments)) * 2 * PI;
+            p1 = float3(r0 * cos(phi1), r0 * sin(phi1), z0);
+        }
+        else
+        {
+            // 2) 수직 줄
+            uint vertIdx = lineIdx - horizTop; // 0..vertTop-1
+            uint stackId = vertIdx / segments; // 0..stacks-1
+            uint segId = vertIdx % segments;
+
+            // 두 스택 간의 점
+            float t0 = stackId / float(stacks);
+            float t1 = (stackId + 1) / float(stacks);
+            float theta0 = t0 * (PI / 2), theta1 = t1 * (PI / 2);
+            float z0 = cos(theta0), z1 = cos(theta1);
+            float r0 = sin(theta0), r1 = sin(theta1);
+            float phi = (segId / float(segments)) * 2 * PI;
+            p0 = float3(r0 * cos(phi), r0 * sin(phi), z0);
+            p1 = float3(r1 * cos(phi), r1 * sin(phi), z1);
+        }
+
+        // 적용: 반지름 스케일 + offset
+        float3 sph0 = p0 * Radius;
+        sph0.z += centerOffset;
+        float3 sph1 = p1 * Radius;
+        sph1.z += centerOffset;
+        localPos = isEnd ? sph1 : sph0;
+    }
+    else if (v < vertsTop + vertsCyl)
+    {
+        // --- 실린더 (unchanged) ---
+        uint cylID = (v - vertsTop) / 2;
+        bool isEnd = ((v - vertsTop) & 1) == 1;
+        uint segId = cylID % segments;
+        float ang = (2 * PI * segId) / segments;
+        float2 circ = float2(cos(ang), sin(ang)) * Radius;
+        float z = isEnd ? -centerOffset : +centerOffset;
+        localPos = float3(circ.x, circ.y, z);
+    }
+    else
+    {
+        // --- 하단 반구 (mirror of 상단) ---
+        uint vv = v - (vertsTop + vertsCyl);
+        uint lineIdx = vv / 2;
+        bool isEnd = (vv & 1) == 1;
+
+        float3 p0, p1;
+        if (lineIdx < horizTop)
+        {
+            // 수평 링
+            uint stackId = lineIdx / segments; // 0..stacks
+            uint segId = lineIdx % segments;
+
+            float t = stackId / float(stacks);
+            float theta = t * (PI / 2);
+            float z0 = -cos(theta), r0 = sin(theta);
+            float phi = (segId / float(segments)) * 2 * PI;
+            p0 = float3(r0 * cos(phi), r0 * sin(phi), z0);
+            float phi1 = (((segId + 1) % segments) / float(segments)) * 2 * PI;
+            p1 = float3(r0 * cos(phi1), r0 * sin(phi1), z0);
+        }
+        else
+        {
+            // 수직 줄
+            uint vertIdx = lineIdx - horizTop;
+            uint stackId = vertIdx / segments;
+            uint segId = vertIdx % segments;
+
+            float t0 = stackId / float(stacks);
+            float t1 = (stackId + 1) / float(stacks);
+            float theta0 = t0 * (PI / 2), theta1 = t1 * (PI / 2);
+            float z0 = -cos(theta0), z1 = -cos(theta1);
+            float r0 = sin(theta0), r1 = sin(theta1);
+            float phi = (segId / float(segments)) * 2 * PI;
+            p0 = float3(r0 * cos(phi), r0 * sin(phi), z0);
+            p1 = float3(r1 * cos(phi), r1 * sin(phi), z1);
+        }
+
+        float3 sph0 = p0 * Radius;
+        sph0.z -= centerOffset;
+        float3 sph1 = p1 * Radius;
+        sph1.z -= centerOffset;
+        localPos = isEnd ? sph1 : sph0;
+    }
+
+    //— 6) 월드·뷰·투영
+    float4 worldP = mul(float4(localPos, 1), World);
+    worldP = mul(worldP, ViewMatrix);
+    worldP = mul(worldP, ProjectionMatrix);
+    output.position = worldP;
+    output.color = float4(0, 1, 0, 1);
     return output;
 }
 

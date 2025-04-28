@@ -231,121 +231,6 @@ void FEditorRenderPass::CreateBuffers()
 
     Resources.Primitives.Sphere.VertexInfo = OutVertexInfo;
     Resources.Primitives.Sphere.IndexInfo = OutIndexInfo;
-
-    TArray<FVector> CapsuleFrameVertices =
-    {
-        
-    };
-    TArray<uint32> CapsuleFrameIndices =
-    {
-    };
-
-    
-    const int segments = 16;      // 수평 방향 세분화
-    const int stacks = 8;         // 반구의 수직 방향 세분화
-    const float halfHeight = 0.5f;
-
-    // -------------------- 상단 반구 --------------------
-    for (int y = 0; y <= stacks; ++y)
-    {
-        float v = float(y) / stacks;
-        float theta = (PI / 2.0f) * v;
-
-        float zPos = cosf(theta);  // 기존 y -> z
-        float r = sinf(theta);     // 반지름
-
-        for (int i = 0; i < segments; ++i)
-        {
-            float u = float(i) / segments;
-            float phi = u * 2.0f * PI;
-
-            float x = r * cosf(phi);
-            float y = r * sinf(phi); // 기존 z -> y
-
-            CapsuleFrameVertices.Add({ FVector(x, y, zPos + halfHeight) });
-        }
-    }
-
-    // 상단 반구 인덱스
-    UINT topStart = 0;
-    for (int y = 0; y < stacks; ++y)
-    {
-        for (int i = 0; i < segments; ++i)
-        {
-            int cur = topStart + y * segments + i;
-            int next = topStart + y * segments + (i + 1) % segments;
-            int below = cur + segments;
-
-            CapsuleFrameIndices.Add(cur); CapsuleFrameIndices.Add(next);   // 가로
-            CapsuleFrameIndices.Add(cur); CapsuleFrameIndices.Add(below);  // 세로
-        }
-    }
-
-    // -------------------- 원통 --------------------
-    UINT cylStart = (UINT)CapsuleFrameVertices.Num();
-    for (int i = 0; i < segments; ++i)
-    {
-        float angle = (2.0f * PI * i) / segments;
-        float x = cosf(angle);
-        float y = sinf(angle);
-
-        CapsuleFrameVertices.Add({ FVector(x, y, +halfHeight) }); // 위쪽 링
-        CapsuleFrameVertices.Add({ FVector(x, y, -halfHeight) }); // 아래쪽 링
-    }
-
-    for (int i = 0; i < segments; ++i)
-    {
-        UINT top = cylStart + i * 2;
-        UINT bottom = top + 1;
-
-        UINT nextTop = cylStart + ((i + 1) % segments) * 2;
-        UINT nextBottom = nextTop + 1;
-
-        CapsuleFrameIndices.Add(top); CapsuleFrameIndices.Add(bottom);         // 세로
-        CapsuleFrameIndices.Add(top); CapsuleFrameIndices.Add(nextTop);        // 상단 링
-        CapsuleFrameIndices.Add(bottom); CapsuleFrameIndices.Add(nextBottom);  // 하단 링
-    }
-
-    // -------------------- 하단 반구 --------------------
-    UINT bottomStart = (UINT)CapsuleFrameVertices.Num();
-    for (int y = 0; y <= stacks; ++y)
-    {
-        float v = float(y) / stacks;
-        float theta = (PI / 2.0f) * v;
-
-        float zPos = -cosf(theta); // 반전
-        float r = sinf(theta);
-
-        for (int i = 0; i < segments; ++i)
-        {
-            float u = float(i) / segments;
-            float phi = u * 2.0f * PI;
-
-            float x = r * cosf(phi);
-            float y = r * sinf(phi);
-
-            CapsuleFrameVertices.Add({ FVector(x, y, zPos - halfHeight) });
-        }
-    }
-
-    for (int y = 0; y < stacks; ++y)
-    {
-        for (int i = 0; i < segments; ++i)
-        {
-            int cur = bottomStart + y * segments + i;
-            int next = bottomStart + y * segments + (i + 1) % segments;
-            int below = cur + segments;
-
-            CapsuleFrameIndices.Add(cur); CapsuleFrameIndices.Add(next);   // 가로
-            CapsuleFrameIndices.Add(cur); CapsuleFrameIndices.Add(below);  // 세로
-        }
-    }
-    
-
-    BufferManager->CreateVertexBuffer<FVector>(TEXT("CapsuleVertexBuffer"), CapsuleFrameVertices, OutVertexInfo, D3D11_USAGE_IMMUTABLE, 0);
-    BufferManager->CreateIndexBuffer<uint32>(TEXT("CapsuleIndexBuffer"), CapsuleFrameIndices, OutIndexInfo);
-    Resources.Primitives.Capsule.VertexInfo = OutVertexInfo;
-    Resources.Primitives.Capsule.IndexInfo = OutIndexInfo;
 }
 
 void FEditorRenderPass::CreateConstantBuffers()
@@ -879,7 +764,7 @@ void FEditorRenderPass::RenderSphereInstanced(uint64 ShowFlag)
 void FEditorRenderPass::RenderCapsuleInstanced(uint64 ShowFlag)
 {
     BindShaderResource(L"CapsuleVS", L"CapsulePS", D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
-    BindBuffers(Resources.Primitives.Capsule);
+    //BindBuffers(Resources.Primitives.Capsule);
     
     // 위치랑 bounding box 크기 정보 가져오기
     TArray<FConstantBufferDebugCapsule> BufferAll;
@@ -931,7 +816,10 @@ void FEditorRenderPass::RenderCapsuleInstanced(uint64 ShowFlag)
         if (SubBuffer.Num() > 0)
         {
             BufferManager->UpdateConstantBuffer<FConstantBufferDebugCapsule>(TEXT("CapsuleConstantBuffer"), SubBuffer);
-            Graphics->DeviceContext->DrawIndexedInstanced(Resources.Primitives.Capsule.IndexInfo.NumIndices, SubBuffer.Num(), 0, 0, 0);
+            //Graphics->DeviceContext->DrawIndexedInstanced(Resources.Primitives.Capsule.IndexInfo.NumIndices, SubBuffer.Num(), 0, 0, 0);
+
+            // 수평 링 : stacks + 1개, 수직 줄 stacks 개
+            Graphics->DeviceContext->DrawInstanced(1184, SubBuffer.Num(), 0, 0);
         }
     }
 }

@@ -96,6 +96,8 @@ private:
     UStaticMeshComponent* SelectedStaticMeshComp = nullptr;
     FObjMaterialInfo tempMaterialInfo;
     bool IsCreateMaterial;
+
+    const FString TemplateFilePath = FString("LuaScripts/template.lua");
 };
 
 template <typename T> requires std::derived_from<T, UActorComponent>

@@ -2,9 +2,7 @@
 
 #include <algorithm>
 #include <string>
-//#include <windows.h>
-//#include <tchar.h>
-
+#include <shellapi.h>
 
 #include "World/World.h"
 #include "Actors/Player.h"
@@ -31,8 +29,9 @@
 #include "Renderer/ShadowManager.h"
 #include "UnrealEd/EditorViewportClient.h"
 #include "UObject/UObjectIterator.h"
-#include "LuaScripts/LuaScriptComponent.h"
-#include "LuaScripts/LuaScriptFileUtils.h"
+#include "Components/LuaScriptComponent.h"
+#include "Engine/Lua/LuaScriptManager.h"
+
 
 void PropertyEditorPanel::Render()
 {
@@ -264,33 +263,91 @@ void PropertyEditorPanel::RenderForActor(AActor* SelectedActor, USceneComponent*
         Engine->DeselectComponent(Engine->GetSelectedComponent());
     }
     
-    FString BasePath = FString(L"LuaScripts\\");
-    FString LuaDisplayPath;
-    if (SelectedActor->GetComponentByClass<ULuaScriptComponent>())
+    FString LuaFilePath = SelectedActor->GetLuaScriptPathName();
+    std::filesystem::path FilePath = std::filesystem::path(GetData(LuaFilePath));
+    if (std::filesystem::exists(GetData(LuaFilePath)))
     {
-        LuaDisplayPath = SelectedActor->GetComponentByClass<ULuaScriptComponent>()->GetDisplayName();
         if (ImGui::Button("Edit Script"))
         {
-            // 예: PickedActor에서 스크립트 경로를 받아옴
-            if (auto* ScriptComp = SelectedActor->GetComponentByClass<ULuaScriptComponent>())
+            std::filesystem::path AbsPath = std::filesystem::absolute(FilePath);
+            LPCTSTR LuaFilePath = AbsPath.c_str();
+
+            // ShellExecute() -> Windows 확장자 연결(Association)에 따라 파일 열기
+            HINSTANCE HInstance = ShellExecute(
+                nullptr,            // 부모 윈도우 핸들 (NULL 사용 가능)
+                L"open",      // 동작(Verb). "open"이면 등록된 기본 프로그램으로 열기
+                LuaFilePath,     // 열고자 하는 파일 경로
+                nullptr,            // 명령줄 인자 (필요 없다면 NULL)
+                nullptr,            // 작업 디렉터리 (필요 없다면 NULL)
+                SW_SHOWNORMAL    // 열리는 창의 상태
+            );
+
+            // ShellExecute는 성공 시 32보다 큰 값을 반환합니다.
+            // 실패 시 32 이하의 값이 반환되므로 간단히 체크 가능
+            if ((INT_PTR)HInstance <= 32) {
+                MessageBox(nullptr, L"파일 열기에 실패했습니다.", L"Error", MB_OK | MB_ICONERROR);
+            }
+        }
+
+        ImGui::SameLine();
+
+        if (ImGui::Button("Delete Script"))
+        {
+            try
             {
-                std::wstring ws = (BasePath + ScriptComp->GetDisplayName()).ToWideString();
-                LuaScriptFileUtils::OpenLuaScriptFile(ws.c_str());
+                if (std::filesystem::exists(FilePath))
+                {
+                    std::filesystem::remove(FilePath);
+                }
+                else
+                {
+                    MessageBoxA(nullptr, "The script file does not exist.", "Error", MB_OK | MB_ICONERROR);
+                }
+            }
+            catch (const std::filesystem::filesystem_error& e)
+            {
+                MessageBoxA(nullptr, "Failed to Delete Script File: ", "Error", MB_OK | MB_ICONERROR);
             }
         }
     }
     else
     {
-        // Add Lua Script
         if (ImGui::Button("Create Script"))
         {
-            // Lua Script Component 생성 및 추가
-            ULuaScriptComponent* NewScript = SelectedActor->AddComponent<ULuaScriptComponent>();
-            LuaDisplayPath = NewScript->GetDisplayName();
+            try
+            {
+                std::filesystem::path Dir = FilePath.parent_path();
+                if (!std::filesystem::exists(Dir))
+                {
+                    std::filesystem::create_directories(Dir);
+                }
+
+                std::ifstream luaTemplateFile(TemplateFilePath.ToWideString());
+
+                std::ofstream file(FilePath);
+                if (file.is_open())
+                {
+                    if (luaTemplateFile.is_open())
+                    {
+                        file << luaTemplateFile.rdbuf();
+                    }
+                    // 생성 완료
+                    file.close();
+                }
+                else
+                {
+                    // TODO: Error Check
+                    MessageBoxA(nullptr, "Failed to Create Script File for writing: ", "Error", MB_OK | MB_ICONERROR);
+                }
+            }
+            catch (const std::filesystem::filesystem_error& e)
+            {
+                // TODO: Error Check
+                MessageBoxA(nullptr, "Failed to Create Script File for writing: ", "Error", MB_OK | MB_ICONERROR);
+            }
         }
     }
-    ImGui::InputText("Script File", GetData(LuaDisplayPath), IM_ARRAYSIZE(*LuaDisplayPath),
-        ImGuiInputTextFlags_ReadOnly);
+    ImGui::InputText("Script Name", GetData(LuaFilePath), LuaFilePath.Len() + 1, ImGuiInputTextFlags_ReadOnly);
 
     if (ImGui::TreeNodeEx("Component", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen)) // 트리 노드 생성
     {

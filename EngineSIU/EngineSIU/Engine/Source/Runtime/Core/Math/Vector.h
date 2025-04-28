@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <cassert>
 #include "MathUtility.h"
 #include "Serialization/Archive.h"
@@ -209,6 +209,7 @@ public:
 
     float Length() const;
     float LengthSquared() const;
+    float SquaredLength() const;
 
     bool Normalize(float Tolerance = SMALL_NUMBER);
 
@@ -221,6 +222,7 @@ public:
     bool IsNearlyZero(float Tolerance = SMALL_NUMBER) const;
     bool IsZero() const;
 
+    bool IsNormalized() const;
     
     FString ToString() const;
     bool InitFromString(const FString& InSourceString);
@@ -368,6 +370,11 @@ inline bool FVector::AllComponentsEqual(float Tolerance) const
 inline float FVector::Length() const
 {
     return FMath::Sqrt(X * X + Y * Y + Z * Z);
+}
+
+inline float FVector::SquaredLength() const
+{
+    return X * X + Y * Y + Z * Z;
 }
 
 inline float FVector::LengthSquared() const

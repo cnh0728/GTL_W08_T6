@@ -61,7 +61,7 @@ void UCameraComponent::ProceedFInterp(float DeltaTime)
     else
     {
         FVector FromLocation = GetWorldLocation();
-
+        FVector MoveLocation = FMath::VInterpTo(FromLocation, FInterpTargetLocation, DeltaTime, FInterpToSpeed);
         FVector Lookat = LookTarget;
     
         CurrentCameraZ = FMath::FInterpTo(CurrentCameraZ, CameraZ, DeltaTime, 0.05f);

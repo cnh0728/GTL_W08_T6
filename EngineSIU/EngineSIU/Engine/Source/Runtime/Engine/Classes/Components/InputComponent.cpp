@@ -52,14 +52,19 @@ void UInputComponent::ClearBindDelegate()
 {
     FSlateAppMessageHandler* Handler = GEngineLoop.GetAppMessageHandler();
 
-    for (FDelegateHandle DelegateHandle : BindKeyDownDelegateHandles)
+    if (!BindKeyDownDelegateHandles.IsEmpty())
     {
-        Handler->OnKeyDownDelegate.Remove(DelegateHandle);
+        for (FDelegateHandle DelegateHandle : BindKeyDownDelegateHandles)
+        {
+            Handler->OnKeyDownDelegate.Remove(DelegateHandle);
+        }
     }
-
-    for (FDelegateHandle DelegateHandle : BindKeyUpDelegateHandles)
+    if (!BindKeyUpDelegateHandles.IsEmpty())
     {
-        Handler->OnKeyUpDelegate.Remove(DelegateHandle);
+        for (FDelegateHandle DelegateHandle : BindKeyUpDelegateHandles)
+        {
+            Handler->OnKeyUpDelegate.Remove(DelegateHandle);
+        }
     }
     
     BindKeyDownDelegateHandles.Empty();

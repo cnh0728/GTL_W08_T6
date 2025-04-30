@@ -15,6 +15,7 @@ enum class EViewScreenLocation : uint8;
 class FViewportResource;
 class ATransformGizmo;
 class USceneComponent;
+struct FMinimalViewInfo;
 
 struct FViewportCamera
 {
@@ -79,7 +80,7 @@ public:
     float OrthoZoom;
 };
 
-class  FEditorViewportClient : public FViewportClient
+class FEditorViewportClient : public FViewportClient
 {
 public:
     FEditorViewportClient();
@@ -113,6 +114,8 @@ protected:
     /** Camera speed scalar */
     float CameraSpeed = 1.0f;
     float GridSize;
+
+    void GetViewInfo(FMinimalViewInfo& OutViewInfo) const;
 
 public:
     FViewport* Viewport;

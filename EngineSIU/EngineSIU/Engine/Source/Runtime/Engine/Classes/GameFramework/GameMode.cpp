@@ -49,6 +49,7 @@ AGameMode::AGameMode()
 
 AGameMode::~AGameMode()
 {
+    EndMatch(false);
 }
 
 void AGameMode::InitializeComponent()

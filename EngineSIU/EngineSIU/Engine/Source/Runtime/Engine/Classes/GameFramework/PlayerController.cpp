@@ -1,18 +1,33 @@
 #include "PlayerController.h"
 
 #include "Camera/PlayerCameraManager.h"
+#include "Engine/Engine.h"
 #include "UObject/UObjectIterator.h"
-
+#include "World/World.h"
 
 
 APlayerController::APlayerController()
 {
-    SetupInputComponent();
 }
 
 
 APlayerController::~APlayerController()
 {
+    UnPossess();
+
+    if (InputComponent)
+    {
+        delete InputComponent;
+        InputComponent = nullptr;
+    }
+}
+
+void APlayerController::PostSpawnInitialize()
+{
+    AActor::PostSpawnInitialize();
+
+    SetupInputComponent();
+    SpawnPlayerCameraManager();
 }
 
 void APlayerController::BeginPlay()
@@ -45,15 +60,17 @@ void APlayerController::ProcessInput(float DeltaTime) const
 
 void APlayerController::Destroyed()
 {
+    UnPossess();
 }
 
 void APlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
+    UnPossess();
 }
 
 void APlayerController::Possess(AActor* InActor)
 {
-    CurrentPossess = InActor;
+    PossessedActor = InActor;
     bHasPossessed = true;
 
     if (InputComponent)
@@ -64,7 +81,8 @@ void APlayerController::Possess(AActor* InActor)
 
 void APlayerController::UnPossess()
 {
-    CurrentPossess = nullptr;
+   
+    PossessedActor = nullptr;
     bHasPossessed = false;
 
     if (InputComponent)
@@ -76,8 +94,9 @@ void APlayerController::UnPossess()
 void APlayerController::SetupInputComponent()
 {
     // What is the correct parameter of ConstructObject?
-    if (InputComponent == nullptr) {
-        InputComponent = FObjectFactory::ConstructObject<UInputComponent>(this);
+    if (InputComponent == nullptr)
+    {
+        InputComponent = AddComponent<UInputComponent>();
     }
 }
 
@@ -94,4 +113,14 @@ AActor* APlayerController::GetViewTarget() const
     AActor* CameraManagerViewTarget = PlayerCameraManager ? PlayerCameraManager->GetViewTarget() : nullptr;
 
     return CameraManagerViewTarget ? CameraManagerViewTarget : const_cast<APlayerController*>(this);
+}
+
+void APlayerController::SpawnPlayerCameraManager()
+{
+    PlayerCameraManager = GetWorld()->SpawnActor<APlayerCameraManager>();
+
+    if (PlayerCameraManager)
+    {
+        PlayerCameraManager->InitializeFor(this);
+    }
 }

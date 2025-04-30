@@ -794,7 +794,7 @@
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Actors\SphereActor.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Actors\CapsuleActor.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Physics\CollisionManager.cpp" />
-    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Actors\PlayerController.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\GameFramework\PlayerController.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Camera\CameraComponent.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\InputComponent.cpp" />
     <ClCompile Include="Engine\Source\Contents\Components\FishTailComponent.cpp" />
@@ -810,6 +810,7 @@
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Camera\PlayerCameraManager.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Camera\CameraModifier.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\GameFramework\SpringArmComponent.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Camera\CameraModifier_CameraShake.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="EngineSIU.natvis" />
@@ -904,7 +905,7 @@
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Actors\CapsuleActor.h" />
     <ClInclude Include="Engine\Source\Runtime\Physics\CollisionManager.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Engine\OverlapResult.h" />
-    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Actors\PlayerController.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\GameFramework\PlayerController.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Camera\CameraComponent.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\InputComponent.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Engine\EventManager.h" />
@@ -922,6 +923,7 @@
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Camera\CameraModifier.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Camera\CameraTypes.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\GameFramework\SpringArmComponent.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Camera\CameraModifier_CameraShake.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\SlateShader.hlsl" />

@@ -6,8 +6,9 @@
 #include "WorldType.h"
 #include "Level.h"
 #include "Actors/Player.h"
-#include "Actors/PlayerController.h"
+#include "GameFramework/PlayerController.h"
 #include "Camera/CameraComponent.h"
+#include "Camera/PlayerCameraManager.h"
 #include "Engine/Engine.h"
 #include "Engine/EventManager.h"
 #include "UObject/UObjectIterator.h"
@@ -71,9 +72,6 @@ public:
     
     FEventManager EventManager;
 
-    void SetMainCamera(UCameraComponent* InCamera) { MainCamera = InCamera; }
-    UCameraComponent* GetMainCamera() const;
-    
     void SetMainPlayer(APlayer* InPlayer){ MainPlayer = InPlayer; }
     APlayer* GetMainPlayer() const;
 
@@ -94,8 +92,7 @@ private:
     /** Actor가 Spawn되었고, 아직 BeginPlay가 호출되지 않은 Actor들 */
     TArray<AActor*> PendingBeginPlayActors;
 
-    UCameraComponent* MainCamera = nullptr;
-
+    // TODO: 싱글 플레이어면 상관 없지만, 로컬 멀티 플레이어인 경우를 위해 배열로 관리하는 방법을 고려하기.
     APlayerController* PlayerController = nullptr;
 
     APlayer* MainPlayer = nullptr;

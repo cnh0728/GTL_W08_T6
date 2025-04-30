@@ -1,4 +1,5 @@
 #pragma once
+#include "CameraTypes.h"
 #include "Components/SceneComponent.h"
 
 class UCameraComponent : public USceneComponent
@@ -23,10 +24,9 @@ public:
     float CameraZ = 0.f; //바닥에 닿을때마다 바닥 Z로 업데이트
     float CameraZOffset = 8.f; //너무 아래 보기때문에 조금 위를 향해서 보는 변수
 
-    static std::shared_ptr<UCameraComponent> DefaultCamera; //아무 세팅 안된 기본카메라가 필요할때 쓰면 됨
-
     void SetLocationWithFInterpTo(FVector& ToLocation);
     void SetFInterpToSpeed(float InSpeed);
+    void SetLookTarget(FVector& Location);
 
     FVector GetLocationWithFInterpTo() const { return FInterpTargetLocation; }
 
@@ -35,10 +35,12 @@ public:
 
     void SetFollowCustomTarget(const FVector& InLocation);
     void ResetFollowToPlayer();
+    void GetCameraView(float DeltaTime, FMinimalViewInfo& DesiredView);
 
 private:
     void ProceedFInterp(float DeltaTime);
     
     FVector FInterpTargetLocation = FVector::ZeroVector;
+    FVector LookTarget = FVector::ZeroVector;
     float FInterpToSpeed = 0.8f;
 };

@@ -233,7 +233,8 @@
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Actors\HeightFogActor.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Actors\LightActor.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Actors\Player.cpp" />
-    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Actors\PlayerController.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Camera\CameraModifier_CameraShake.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\GameFramework\PlayerController.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Actors\PointLightActor.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Actors\SphereActor.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Actors\SpotLightActor.cpp" />
@@ -492,7 +493,8 @@
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Actors\HeightFogActor.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Actors\LightActor.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Actors\Player.h" />
-    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Actors\PlayerController.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Camera\CameraModifier_CameraShake.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\GameFramework\PlayerController.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Actors\PointLightActor.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Actors\SphereActor.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Actors\SpotLightActor.h" />

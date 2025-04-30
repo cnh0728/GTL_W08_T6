@@ -12,7 +12,10 @@ class UCameraModifier : public UObject
 public:
     UCameraModifier();
 
-    /* CameraShake에서 상속받아 사용 */
+    /* 카메라에 적용할 변형/수정 효과를 매 프레임마다 적용
+     * 위치/회전/FOV/PostProcess 등에 영향
+     * @return bool True if should STOP looping the chain, false otherwise
+     */
     virtual bool ModifyCamera(float DeltaTime, FMinimalViewInfo& InOutPOV); 
 
 public:

@@ -1,13 +1,8 @@
 #include "CameraComponent.h"
-
-#include <algorithm>
-
 #include "Engine/Engine.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "UObject/Casts.h"
 #include "World/World.h"
-
-std::shared_ptr<UCameraComponent> UCameraComponent::DefaultCamera = std::make_shared<UCameraComponent>();
 
 UObject* UCameraComponent::Duplicate(UObject* InOuter)
 {
@@ -52,6 +47,8 @@ void UCameraComponent::FollowMainPlayer()
     FVector MoveToLocation = FVector(PlayerLocation.X, PlayerLocation.Y, CameraZ) + CameraOffset;
     
     SetLocationWithFInterpTo(MoveToLocation);
+
+    SetLookTarget(PlayerLocation);
 }
 
 void UCameraComponent::ProceedFInterp(float DeltaTime)
@@ -66,20 +63,18 @@ void UCameraComponent::ProceedFInterp(float DeltaTime)
         FVector FromLocation = GetWorldLocation();
 
         //카메라 위치
-        FVector MoveLocation = FMath::VInterpTo(FromLocation, FInterpTargetLocation, DeltaTime, FInterpToSpeed);
+        FVector MoveLocation = FMath::FInterpTo(FromLocation, FInterpTargetLocation, DeltaTime, FInterpToSpeed);
 
-        FVector PlayerLocation = GEngine->ActiveWorld->GetMainPlayer()->GetActorLocation();
+        FVector Lookat = LookTarget;
+    
         CurrentCameraZ = FMath::FInterpTo(CurrentCameraZ, CameraZ, DeltaTime, 0.05f);
-        PlayerLocation.Z = CurrentCameraZ + CameraZOffset;
-
-        FRotator TargetRotation = FRotator::MakeLookAtRotation(MoveLocation, PlayerLocation);
-
-
+        Lookat.Z = CurrentCameraZ + CameraZOffset;
+    
+        FRotator TargetRotation = FRotator::MakeLookAtRotation(MoveLocation, Lookat);
+    
         SetWorldLocation(MoveLocation);
         SetWorldRotation(TargetRotation);
     }
-   
-   
 }
 
 void UCameraComponent::SetLocationWithFInterpTo(FVector& ToLocation) //LerpSpeed = 0은 안움직이고 1은 바로이동
@@ -92,6 +87,11 @@ void UCameraComponent::SetFInterpToSpeed(float InSpeed)
     FInterpToSpeed = InSpeed;
 }
 
+void UCameraComponent::SetLookTarget(FVector& Location)
+{
+    LookTarget = Location;
+}
+
 void UCameraComponent::SetFollowCustomTarget(const FVector& InLocation)
 {
     bFollowCustomTarget = true;
@@ -101,4 +101,13 @@ void UCameraComponent::SetFollowCustomTarget(const FVector& InLocation)
 void UCameraComponent::ResetFollowToPlayer()
 {
     bFollowCustomTarget = false;
+}
+
+
+void UCameraComponent::GetCameraView(float DeltaTime, FMinimalViewInfo& DesiredView)
+{
+
+	DesiredView.Location = GetWorldLocation();
+	DesiredView.Rotation = GetWorldRotation();
+	DesiredView.FOV = ViewFOV;
 }

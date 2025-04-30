@@ -147,22 +147,26 @@ void UWorld::BeginPlay()
                 Target.X -= 20.0f;
             
                 MainTextComponent->SetText(L"Press Space to start");
-                GetMainCamera()->SetFInterpToSpeed(3.0f);
-                GetMainCamera()->SetFollowCustomTarget(Target);
+                //GetMainCamera()->SetFInterpToSpeed(3.0f);
+                //GetMainCamera()->SetFollowCustomTarget(Target);
             }
         });
 
         GameMode->OnGameStart.AddLambda([this]() {
-            GetMainCamera()->SetFInterpToSpeed(0.8f);
-            GetMainCamera()->ResetFollowToPlayer();
+            //GetMainCamera()->SetFInterpToSpeed(0.8f);
+            //GetMainCamera()->ResetFollowToPlayer();
             });
 
         GameMode->OnGameEnd.AddLambda([this](bool bIsWin) {
             if (MainTextComponent) {
-                FVector Target = MainTextComponent->GetWorldLocation();
-                Target.X -= 20.0f;
-                Target.Z -= GetMainCamera()->CameraHeight;
+//                FVector Target = MainTextComponent->GetWorldLocation();
+//                FVector TextLoc = Target;
+//                Target.X -= 20.0f;
+//                Target.Z -= GetMainCamera()->CameraHeight;
 
+//                GetMainCamera()->SetFollowCustomTarget(Target);
+//                GetMainCamera()->SetLookTarget(TextLoc);
+                
                 if (bIsWin)
                 {
                     AFish* Fish = Cast<AFish>(GEngine->ActiveWorld->GetMainPlayer());
@@ -170,12 +174,9 @@ void UWorld::BeginPlay()
                     FString Message = FString::Printf(TEXT("Earned Coin %d"), Fish->GetScore());
                     MainTextComponent->SetText(Message.ToWideString());
                     //MainCamera->CameraZOffset = 0.0f;
-                    GetMainCamera()->SetFollowCustomTarget(Target);
                 } else
                 {
                     MainTextComponent->SetText(L"Fish roasted");
-                    //MainCamera->CameraZOffset = 0.0f;
-                    GetMainCamera()->SetFollowCustomTarget(Target);
                     
                     AFish* Fish = Cast<AFish>(GEngine->ActiveWorld->GetMainPlayer());
                     Fish->SetActorLocation(FVector(-110.0f, 0.0f, -4.0f));
@@ -285,31 +286,13 @@ UWorld* UWorld::GetWorld() const
     return const_cast<UWorld*>(this);
 }
 
-UCameraComponent* UWorld::GetMainCamera() const
-{
-    if (MainCamera)
-    {
-        return MainCamera;
-    }
-
-    //메인카메라 설정안하면 있는거중 한개
-    for (const auto iter: TObjectRange<UCameraComponent>())
-    {
-        if (iter->GetWorld() == GEngine->ActiveWorld)
-        {
-            return iter;
-        }
-    }
-
-    return nullptr;
-}
-
 APlayer* UWorld::GetMainPlayer() const
 {
     if (MainPlayer)
     {
         return MainPlayer;
     }
+    
     //메인플레이어 설정안하면 있는거중 한개
     for (const auto iter: TObjectRange<APlayer>())
     {

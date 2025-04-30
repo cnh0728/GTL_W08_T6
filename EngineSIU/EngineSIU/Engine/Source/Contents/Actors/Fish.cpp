@@ -207,10 +207,12 @@ void AFish::ActorBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
 
         SetHealth(GetHealth() - 1);
 
+        /* DEPRECATED
         if (GetWorld() && GetWorld()->GetMainCamera())
         {
             //GetWorld()->GetMainCamera()->CameraZ = GetActorLocation().Z;
         }
+        */
     }
     else if (OtherActor->IsA<AItemActor>() && !OtherActor->IsHidden())
     {

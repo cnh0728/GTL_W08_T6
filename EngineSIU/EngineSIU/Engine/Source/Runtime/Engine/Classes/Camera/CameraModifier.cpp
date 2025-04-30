@@ -6,9 +6,6 @@ UCameraModifier::UCameraModifier()
 {
 }
 
-/* 카메라에 적용할 변형/수정 효과를 매 프레임마다 적용
- * 위치/회전/FOV/PostProcess 등에 영향
- */
 bool UCameraModifier::ModifyCamera(float DeltaTime, FMinimalViewInfo& InOutPOV)
 {
     UpdateAlpha(DeltaTime);

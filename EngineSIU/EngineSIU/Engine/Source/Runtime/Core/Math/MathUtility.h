@@ -118,7 +118,7 @@ struct FMath
 	    //const RetType DeltaMove = Dist * FMath::Clamp<float>(DeltaTime * InterpSpeed, 0.f, 1.f);
 	    
 	    // TODO: 현재 float * FVector가 float값으로 받는게 안되기때문에 float로 강제하는 중. 아래가 원래 Unreal Code
-	    const RetType DeltaMove = Dist * FMath::Clamp<RetType>(DeltaTime * InterpSpeed, 0.f, 1.f);
+	    const RetType DeltaMove = Dist * FMath::Clamp<float>(DeltaTime * InterpSpeed, 0.f, 1.f);
 
 	    return Current + DeltaMove;				
 	}

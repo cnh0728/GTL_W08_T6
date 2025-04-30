@@ -1,6 +1,9 @@
 #pragma once
+#include "CameraTypes.h"
 #include "GameFramework/Actor.h"
 
+class UCameraComponent;
+class UCameraModifier_CameraShake;
 class APlayerController;
 class UCameraModifier;
 
@@ -9,12 +12,10 @@ class UCameraModifier;
 
 struct FTViewTarget
 {
-    AActor* Target;
-    FPOV POV;
+    AActor* Target; 
+    FMinimalViewInfo POV;
+
 public:
-
-    void SetNewTarget(AActor* NewTarget);
-
     bool Equal(const FTViewTarget& OtherTarget) const;
 
     FTViewTarget()
@@ -23,15 +24,21 @@ public:
     }
 
     void CheckViewTarget(APlayerController* OwningController);
+
+    void SetNewTarget(AActor* NewTarget);
+    AActor* GetTargetActor() const;
 };
-
-
 
 class APlayerCameraManager : public AActor
 {
     DECLARE_CLASS(APlayerCameraManager, AActor)
+
+    APlayerController* PCOwner;
+    
 public:
     APlayerCameraManager();
+
+    virtual void InitializeFor(APlayerController* PC);
 
     AActor* GetViewTarget() const;
     
@@ -39,7 +46,12 @@ public:
 
     /* Fade IN / OUT */
     void StartCameraFade(float FromAlpha, float ToAlpha, float Duration, FLinearColor Color, bool bHoldWhenFinished = false);
+
     void StopCameraFade();
+
+    void ApplyCameraModifiers(float DeltaTime, FMinimalViewInfo& InOutPOV);
+    
+    void AssignViewTarget(AActor* NewTarget, FTViewTarget& VT);
 
     void SetCameraVignette(float InIntensity, float InRadius, float InSmoothness);
     void SetCameraVignetteColor(FLinearColor InColor);
@@ -47,13 +59,14 @@ public:
     
     float GetLetterBoxRatio();
 protected:
+    virtual void DoUpdateCamera(float DeltaTime);
 
+    FMinimalViewInfo BlendViewTargets(const FTViewTarget& A, const FTViewTarget& B, float Alpha);
+    virtual void UpdateViewTarget(FTViewTarget& OutVT, float DeltaTime);
 
-    FPOV BlendViewTargets(const FTViewTarget& A, const FTViewTarget& B, float Alpha);
-
-
-protected:
     TArray<UCameraModifier*> ModifierList;
+
+    UCameraModifier_CameraShake* CachedCameraShakeMod;
 
 public:
     FTViewTarget ViewTarget;
@@ -76,6 +89,23 @@ public:
 
     FName CameraStyle;
 
+    float DefaultFOV;
+    float DefaultAspectRatio;
+    uint32 bDefaultConstrainAspectRatio : 1;
+
+  	/** Minimum view pitch, in degrees. */
+    float ViewPitchMin;
+    /** Maximum view pitch, in degrees. */
+    float ViewPitchMax;
+    /** Minimum view yaw, in degrees. */
+    float ViewYawMin;
+    /** Maximum view yaw, in degrees. */
+    float ViewYawMax;
+    /** Minimum view roll, in degrees. */
+    float ViewRollMin;
+    /** Maximum view roll, in degrees. */
+    float ViewRollMax;
+    
     // [TEMP] Vignette factor
     FVector2D VignetteCenter;
 

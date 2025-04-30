@@ -248,10 +248,7 @@ void PropertyEditorPanel::RenderForSceneComponent(USceneComponent* SceneComponen
 
 void PropertyEditorPanel::RenderForCameraComponent(UCameraComponent* InCameraComponent)
 {
-    if (ImGui::Button("SetMainCamera"))
-    {
-        GEngine->ActiveWorld->SetMainCamera(InCameraComponent);
-    }
+    
 }
 
 void PropertyEditorPanel::RenderForPlayerActor(APlayer* InPlayerActor)
